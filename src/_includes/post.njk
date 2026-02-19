@@ -1,0 +1,30 @@
+---
+layout: base.njk
+---
+
+<article class="post-page">
+  <a href="/" class="post-page-back">&larr; Back to all stories</a>
+  <h1>{{ title }}</h1>
+  <div class="post-page-meta">
+    <span class="tag">{{ category }}</span>
+    <span class="date">{{ date | dateDisplay }} &middot; {{ content | readingTime }}</span>
+  </div>
+  <div class="post-page-body">
+    {{ content | safe }}
+  </div>
+</article>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner reveal">
+    <p class="section-marker">Get in touch</p>
+    <h2 class="contact-big">Let&rsquo;s have a <span class="italic">chai</span> sometime</h2>
+    <p class="contact-sub">Or just drop a message &mdash; even if it&rsquo;s a movie recommendation.</p>
+    <a href="mailto:{{ site.email }}" class="contact-email">{{ site.email }} &rarr;</a>
+    <div class="socials">
+      <a href="{{ site.social.instagram }}" target="_blank" class="social" title="Instagram">IG</a>
+      <a href="{{ site.social.twitter }}" target="_blank" class="social" title="Twitter">X</a>
+      <a href="{{ site.social.linkedin }}" target="_blank" class="social" title="LinkedIn">IN</a>
+    </div>
+  </div>
+</section>

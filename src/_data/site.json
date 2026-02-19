@@ -1,0 +1,18 @@
+{
+  "title": "Lucky Bajaj",
+  "description": "Stories about the small, beautiful moments we often forget to notice — written from Mumbai, one chai at a time.",
+  "author": "Lucky Bajaj",
+  "email": "imluckybajaj@gmail.com",
+  "url": "https://www.luckybajaj.com",
+  "social": {
+    "instagram": "https://www.instagram.com/luckynotluckyy/",
+    "twitter": "https://twitter.com/imlucky_bajaj",
+    "linkedin": "https://www.linkedin.com/in/lucky-bajaj/"
+  },
+  "about": {
+    "intro": "Hello! My name is **Lucky Bajaj**. Yes, that's my real name. My parents thought *let's give our child a name that wouldn't need a nickname.*",
+    "body": "I'm an IT Engineer by education and work in **Product Management** by profession. But really, I'm just an average guy from Mumbai — someone who's trying to keep up with the latest trends while being old-school at heart. I invest in cryptocurrency and pretend to know about them, and I'm starting a blog in the times of Instagram reels.",
+    "outro": "In my free-time I cook, watch movies, nerd about the movies I watched, force people to watch those movies, and occasionally write here about things that nobody gives a bat about. And I wouldn't have it any other way.",
+    "interests": ["🍳 Cooking", "🎬 Cinema nerd", "🏍️ Late night rides", "☕ Chai over coffee", "🫓 Paan enthusiast", "✍️ Writing", "💻 Tech"]
+  }
+}

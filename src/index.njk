@@ -1,0 +1,96 @@
+---
+layout: base.njk
+title: ""
+---
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-line"></div><div class="hero-line"></div><div class="hero-line"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Personal Blog &middot; Mumbai</p>
+    <h1 class="hero-title">Stories<br>about <span class="italic">small</span><br>beautiful things</h1>
+    <p class="hero-desc">{{ site.description }}</p>
+    <a href="#stories" class="hero-cta">Read the stories <span class="hero-cta-line"></span></a>
+  </div>
+  <span class="hero-side-text">Scroll to explore</span>
+</section>
+
+<!-- STORIES -->
+<section class="stories" id="stories">
+  <p class="section-marker reveal">Writing</p>
+  <h2 class="section-heading reveal">All Stories</h2>
+
+  {% set allPosts = collections.posts %}
+  {% set featuredPost = allPosts[0] %}
+
+  <!-- Featured post -->
+  <a href="{{ featuredPost.url }}" class="featured-post reveal">
+    <div class="featured-left">
+      <div class="featured-meta">
+        <span class="tag">{{ featuredPost.data.category }}</span>
+        <span class="date">{{ featuredPost.date | dateDisplay }} &middot; {{ featuredPost.templateContent | readingTime }}</span>
+      </div>
+      <h3 class="featured-title">{{ featuredPost.data.title }}</h3>
+      <p class="featured-excerpt">{{ featuredPost.templateContent | excerpt }}</p>
+      <span class="featured-number">01</span>
+    </div>
+    <div class="featured-right">
+      {% if featuredPost.data.pullquote %}
+      <p class="pull-quote">{{ featuredPost.data.pullquote }}</p>
+      {% else %}
+      <p class="pull-quote">{{ featuredPost.templateContent | excerpt }}</p>
+      {% endif %}
+    </div>
+  </a>
+
+  <!-- Grid of remaining posts -->
+  <div class="posts-grid">
+    {% for post in allPosts %}
+      {% if loop.index0 > 0 %}
+      <a href="{{ post.url }}" class="post-card {% if post.data.category == 'Poetry' %}poetry{% endif %} reveal">
+        <span class="post-number">{% set num = loop.index0 + 1 %}{% if num < 10 %}0{{ num }}{% else %}{{ num }}{% endif %}</span>
+        <p class="card-tag">{{ post.data.category }}</p>
+        <h4 class="card-title">{{ post.data.title }}</h4>
+        <p class="card-excerpt">{{ post.templateContent | excerpt }}</p>
+        <p class="card-date">{{ post.date | dateDisplay }} &middot; {{ post.templateContent | readingTime }}</p>
+      </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-left reveal">
+      <p class="section-marker">About</p>
+      <h2 class="about-name">Lucky<br><span class="last">Bajaj</span></h2>
+      <p class="about-role">Product Manager &middot; Writer &middot; Mumbai</p>
+      <div class="about-tags">
+        {% for interest in site.about.interests %}
+        <span class="about-tag">{{ interest }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="about-text reveal">
+      <p>{{ site.about.intro | safe }}</p>
+      <p>{{ site.about.body | safe }}</p>
+      <p>{{ site.about.outro | safe }}</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner reveal">
+    <p class="section-marker">Get in touch</p>
+    <h2 class="contact-big">Let&rsquo;s have a <span class="italic">chai</span> sometime</h2>
+    <p class="contact-sub">Or just drop a message &mdash; even if it&rsquo;s a movie recommendation.</p>
+    <a href="mailto:{{ site.email }}" class="contact-email">{{ site.email }} &rarr;</a>
+    <div class="socials">
+      <a href="{{ site.social.instagram }}" target="_blank" class="social" title="Instagram">IG</a>
+      <a href="{{ site.social.twitter }}" target="_blank" class="social" title="Twitter">X</a>
+      <a href="{{ site.social.linkedin }}" target="_blank" class="social" title="LinkedIn">IN</a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if title %}{{ title }} — {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ description or site.description }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="cursor-glow" id="glow"></div>
+  <div class="noise"></div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">Lucky<span class="dot">.</span></a>
+      <ul class="nav-links">
+        <li><a href="/#stories" {% if page.url == "/" %}class="active"{% endif %}>Stories</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  {{ content | safe }}
+
+  <!-- FOOTER -->
+  <footer>
+    <span>&copy; {{ 2025 }} {{ site.author }}</span>
+    <span>Made with <span class="amber">&hearts;</span> from Mumbai</span>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

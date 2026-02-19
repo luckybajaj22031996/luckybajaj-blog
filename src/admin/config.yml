@@ -1,0 +1,55 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "static/images"
+public_folder: "/images"
+
+collections:
+  - name: "posts"
+    label: "Blog Posts"
+    folder: "src/posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime" }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - "Life"
+          - "Movies"
+          - "Shorts"
+          - "Poetry"
+          - "Fiction"
+      - { label: "Pull Quote", name: "pullquote", widget: "string", required: false, hint: "A memorable line from the post shown on the homepage" }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - label: "Site Info"
+        name: "site"
+        file: "src/_data/site.json"
+        fields:
+          - { label: "Site Title", name: "title", widget: "string" }
+          - { label: "Site Description", name: "description", widget: "text" }
+          - { label: "Author Name", name: "author", widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
+          - { label: "Site URL", name: "url", widget: "string" }
+          - label: "Social Links"
+            name: "social"
+            widget: "object"
+            fields:
+              - { label: "Instagram", name: "instagram", widget: "string" }
+              - { label: "Twitter / X", name: "twitter", widget: "string" }
+              - { label: "LinkedIn", name: "linkedin", widget: "string" }
+          - label: "About Section"
+            name: "about"
+            widget: "object"
+            fields:
+              - { label: "Intro Paragraph", name: "intro", widget: "text" }
+              - { label: "Body Paragraph", name: "body", widget: "text" }
+              - { label: "Outro Paragraph", name: "outro", widget: "text" }
+              - { label: "Interests", name: "interests", widget: "list", field: { label: "Interest", name: "interest", widget: "string" } }
