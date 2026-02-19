@@ -2,6 +2,7 @@ backend:
   name: github
   repo: luckybajaj22031996/luckybajaj-blog
   branch: main
+  site_domain: luckybajaj-blog.netlify.app
 
 media_folder: "static/images"
 public_folder: "/images"
