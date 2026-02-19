@@ -1,5 +1,6 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: luckybajaj22031996/luckybajaj-blog
   branch: main
 
 media_folder: "static/images"
