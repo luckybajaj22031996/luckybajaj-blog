@@ -127,14 +127,26 @@ body {
 
 .post-body a {
   color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-  transition: text-decoration-color 0.3s ease;
+  text-decoration: none;
+  position: relative;
 }
 
-.post-body a:hover {
-  text-decoration-color: var(--color-accent);
+.post-body a::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.post-body a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 /* ===== AMBIENT LIGHT ===== */

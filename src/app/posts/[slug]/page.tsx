@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug, getSiteData } from "@/lib/posts";
+import { getAllPosts, getPostBySlug, getAdjacentPosts, getSiteData } from "@/lib/posts";
 import Link from "next/link";
 import Contact from "@/components/Contact";
 import PageTransition from "@/components/PageTransition";
 import ScrollReveal from "@/components/ScrollReveal";
+import ReadingProgress from "@/components/ReadingProgress";
+import NextStory from "@/components/NextStory";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 interface PostPageProps {
@@ -22,6 +24,17 @@ export async function generateMetadata({ params }: PostPageProps) {
   return {
     title: post.title,
     description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.date,
+    },
+    twitter: {
+      card: "summary",
+      title: post.title,
+      description: post.excerpt,
+    },
   };
 }
 
@@ -29,6 +42,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   const site = getSiteData();
+  const { prev, next } = getAdjacentPosts(slug);
 
   if (!post) notFound();
 
@@ -40,6 +54,8 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <PageTransition>
+      <ReadingProgress />
+
       <article className="pt-40 pb-20 px-6 max-w-[720px] mx-auto relative z-10">
         <ScrollReveal>
           <Link
@@ -89,6 +105,11 @@ export default async function PostPage({ params }: PostPageProps) {
           </div>
         </ScrollReveal>
       </article>
+
+      <NextStory
+        prev={prev ? { slug: prev.slug, title: prev.title, category: prev.category } : null}
+        next={next ? { slug: next.slug, title: next.title, category: next.category } : null}
+      />
 
       <Contact site={site} />
     </PageTransition>

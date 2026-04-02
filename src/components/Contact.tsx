@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ScrollReveal from "./ScrollReveal";
+import MagneticButton from "./MagneticButton";
 
 interface ContactProps {
   site: {
@@ -43,6 +44,7 @@ export default function Contact({ site }: ContactProps) {
         </ScrollReveal>
 
         <ScrollReveal delay={0.3}>
+          <MagneticButton className="inline-block" strength={0.25}>
           <Link
             href={`mailto:${site.email}`}
             className="inline-flex items-center gap-3 px-8 py-4 border border-[var(--color-border)] text-sm font-medium text-[var(--color-text)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-all duration-500 group"
@@ -63,6 +65,7 @@ export default function Contact({ site }: ContactProps) {
               <path d="m12 5 7 7-7 7" />
             </svg>
           </Link>
+          </MagneticButton>
         </ScrollReveal>
 
         <ScrollReveal delay={0.4}>

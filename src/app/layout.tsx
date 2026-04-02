@@ -15,6 +15,23 @@ export const metadata: Metadata = {
     template: `%s — ${site.title}`,
   },
   description: site.description,
+  metadataBase: new URL(site.url || "https://luckybajaj.com"),
+  openGraph: {
+    title: site.title,
+    description: site.description,
+    url: site.url,
+    siteName: site.title,
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.title,
+    description: site.description,
+  },
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

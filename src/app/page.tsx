@@ -1,7 +1,7 @@
 import { getAllPosts, getSiteData } from "@/lib/posts";
 import Hero from "@/components/Hero";
 import FeaturedPost from "@/components/FeaturedPost";
-import PostCard from "@/components/PostCard";
+import PostGrid from "@/components/PostGrid";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -52,21 +52,8 @@ export default function Home() {
             />
           )}
 
-          {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8">
-            {rest.map((post, i) => (
-              <PostCard
-                key={post.slug}
-                slug={post.slug}
-                title={post.title}
-                category={post.category}
-                excerpt={post.excerpt}
-                date={post.date}
-                readingTime={post.readingTime}
-                index={i}
-              />
-            ))}
-          </div>
+          {/* Staggered grid */}
+          <PostGrid posts={rest} />
         </div>
       </section>
 

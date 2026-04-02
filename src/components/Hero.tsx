@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 
 interface HeroProps {
@@ -246,11 +247,13 @@ export default function Hero({ pullquotes }: HeroProps) {
           WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 70% 50%, black 20%, transparent 70%)",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/mumbai-watercolor.png"
           alt=""
-          className="w-full h-full object-cover"
+          fill
+          sizes="(max-width: 768px) 350px, 750px"
+          className="object-cover"
+          priority={false}
         />
       </div>
 

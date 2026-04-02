@@ -73,6 +73,15 @@ export function getPostBySlug(slug: string): Post | undefined {
   };
 }
 
+export function getAdjacentPosts(slug: string): { prev: Post | null; next: Post | null } {
+  const posts = getAllPosts();
+  const index = posts.findIndex((p) => p.slug === slug);
+  return {
+    prev: index > 0 ? posts[index - 1] : null,
+    next: index < posts.length - 1 ? posts[index + 1] : null,
+  };
+}
+
 export function getSiteData() {
   const filePath = path.join(process.cwd(), "content/site.json");
   const raw = fs.readFileSync(filePath, "utf8");
