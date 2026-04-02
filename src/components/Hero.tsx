@@ -22,7 +22,8 @@ export default function Hero({ pullquotes }: HeroProps) {
   const lines = [
     { text: "Stories", accentRange: null },
     { text: "about small", accentRange: [6, 11] as [number, number] }, // "small" starts at index 6
-    { text: "beautiful things", accentRange: null },
+    { text: "beautiful", accentRange: null },
+    { text: "things", accentRange: null },
   ];
 
   const allChars = lines.flatMap((line, lineIdx) =>
