@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -8,25 +8,80 @@ interface HeroProps {
   pullquotes: string[];
 }
 
+// Typewriter sound using Web Audio API — generates a short mechanical click
+function createTypeSound(ctx: AudioContext) {
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    // Sharp attack, fast decay — mechanical click
+    const t = i / ctx.sampleRate;
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 120) * 0.3;
+  }
+  return buffer;
+}
+
+function createCarriageSound(ctx: AudioContext) {
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const t = i / ctx.sampleRate;
+    // Longer, lower rumble for carriage return
+    data[i] =
+      (Math.random() * 2 - 1) * Math.exp(-t * 25) * 0.15 +
+      Math.sin(t * 200) * Math.exp(-t * 30) * 0.1;
+  }
+  return buffer;
+}
+
+function playBuffer(ctx: AudioContext, buffer: AudioBuffer) {
+  // Always try to resume — will succeed once user has interacted
+  if (ctx.state === "suspended") {
+    ctx.resume();
+  }
+  if (ctx.state !== "running") return;
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.playbackRate.value = 0.9 + Math.random() * 0.3;
+  source.connect(ctx.destination);
+  source.start();
+}
+
 export default function Hero({ pullquotes }: HeroProps) {
+  // Check if animation already played this session
+  const hasPlayed = typeof window !== "undefined" && sessionStorage.getItem("hero-played") === "1";
+
   const [typedChars, setTypedChars] = useState<
-    { char: string; line: number; index: number; rotation: number }[]
+    { char: string; line: number; index: number; rotation: number; isScene: boolean }[]
   >([]);
-  const [typingDone, setTypingDone] = useState(false);
-  const [caretVisible, setCaretVisible] = useState(true);
+  const [typingDone, setTypingDone] = useState(hasPlayed);
+  const [caretVisible, setCaretVisible] = useState(!hasPlayed);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [lineShake, setLineShake] = useState<number | null>(null);
+  const [sceneDone, setSceneDone] = useState(hasPlayed);
   const prefersReduced = useRef(false);
-  const typingRef = useRef(false);
+  const typingRef = useRef(hasPlayed);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const typeSoundRef = useRef<AudioBuffer | null>(null);
+  const carriageSoundRef = useRef<AudioBuffer | null>(null);
 
-  const lines = [
+  // Scene heading typed first, then the main title
+  const sceneHeading = "INT. A WRITER'S DESK - NIGHT";
+
+  const titleLines = [
     { text: "Stories", accentRange: null },
-    { text: "about small", accentRange: [6, 11] as [number, number] }, // "small" starts at index 6
+    { text: "about small", accentRange: [6, 11] as [number, number] },
     { text: "beautiful", accentRange: null },
     { text: "things", accentRange: null },
   ];
 
-  const allChars = lines.flatMap((line, lineIdx) =>
+  // Scene heading is line 0, title lines start at 1
+  const allLines = [
+    { text: sceneHeading, accentRange: null, isScene: true },
+    ...titleLines.map((l) => ({ ...l, isScene: false })),
+  ];
+
+  const allChars = allLines.flatMap((line, lineIdx) =>
     line.text.split("").map((char, charIdx) => ({
       char,
       line: lineIdx,
@@ -35,25 +90,60 @@ export default function Hero({ pullquotes }: HeroProps) {
         line.accentRange !== null &&
         charIdx >= line.accentRange[0] &&
         charIdx < line.accentRange[1],
+      isScene: line.isScene,
     }))
   );
 
-  // Check for reduced motion
+  // Skip animation if already played or reduced motion
   useEffect(() => {
     prefersReduced.current = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (prefersReduced.current) {
-      setTypedChars(
-        allChars.map((c) => ({
-          char: c.char,
-          line: c.line,
-          index: c.index,
-          rotation: 0,
-        }))
-      );
+
+    if (prefersReduced.current || hasPlayed) {
+      const filled = allChars.map((c) => ({
+        char: c.char,
+        line: c.line,
+        index: c.index,
+        rotation: 0,
+        isScene: c.isScene,
+      }));
+      setTypedChars(filled);
+      setSceneDone(true);
       setTypingDone(true);
       setCaretVisible(false);
+    }
+  }, []);
+
+  // Create audio context — needs to be in useEffect (SSR safety)
+  // but also needs a user gesture listener to reliably resume
+  useEffect(() => {
+    if (hasPlayed) return; // No audio needed if animation already done
+
+    try {
+      const ctx = new AudioContext();
+      audioCtxRef.current = ctx;
+      typeSoundRef.current = createTypeSound(ctx);
+      carriageSoundRef.current = createCarriageSound(ctx);
+
+      // Aggressively try to resume on any user gesture
+      function tryResume() {
+        if (ctx.state === "suspended") ctx.resume();
+        if (ctx.state === "running") {
+          ["mousedown", "touchstart", "keydown"].forEach((e) =>
+            window.removeEventListener(e, tryResume)
+          );
+        }
+      }
+
+      ["mousedown", "touchstart", "keydown"].forEach((e) =>
+        window.addEventListener(e, tryResume, { passive: true })
+      );
+
+      // Also try immediately
+      tryResume();
+    } catch {
+      // Audio not available
     }
   }, []);
 
@@ -68,6 +158,7 @@ export default function Hero({ pullquotes }: HeroProps) {
     function typeNext() {
       if (i >= allChars.length) {
         setTypingDone(true);
+        sessionStorage.setItem("hero-played", "1");
         setTimeout(() => setCaretVisible(false), 1200);
         return;
       }
@@ -75,40 +166,60 @@ export default function Hero({ pullquotes }: HeroProps) {
       const entry = allChars[i];
       const isNewLine = entry.line !== prevLine;
       const isSpace = entry.char === " ";
+      const isTransitionToTitle = prevLine === 0 && entry.line === 1;
 
-      // Random tiny rotation for imperfection (-0.7 to 0.7 degrees)
-      const rotation = (Math.random() - 0.5) * 1.4;
+      const rotation = entry.isScene ? 0 : (Math.random() - 0.5) * 1.4;
 
-      // Trigger line shake on each character
-      setLineShake(entry.line);
-      setTimeout(() => setLineShake(null), 60);
+      // Shake effect (not on scene heading — it types cleanly)
+      if (!entry.isScene) {
+        setLineShake(entry.line);
+        setTimeout(() => setLineShake(null), 60);
+      }
+
+      // Play type sound
+      if (audioCtxRef.current && typeSoundRef.current) {
+        if (isNewLine && carriageSoundRef.current) {
+          playBuffer(audioCtxRef.current, carriageSoundRef.current);
+        } else if (!isSpace) {
+          playBuffer(audioCtxRef.current, typeSoundRef.current);
+        }
+      }
 
       setTypedChars((prev) => [
         ...prev,
-        { char: entry.char, line: entry.line, index: entry.index, rotation },
+        { char: entry.char, line: entry.line, index: entry.index, rotation, isScene: entry.isScene },
       ]);
+
+      // Mark scene heading done when transitioning to title
+      if (isTransitionToTitle) {
+        setSceneDone(true);
+      }
 
       prevLine = entry.line;
       i++;
 
-      // Timing: slower, more deliberate, with human variation
+      // Timing
       let delay: number;
-      if (isNewLine) {
-        // Carriage return pause - the big mechanical moment
+      if (isTransitionToTitle) {
+        // Longer pause after scene heading — dramatic beat
+        delay = 900 + Math.random() * 200;
+      } else if (isNewLine) {
         delay = 500 + Math.random() * 200;
       } else if (isSpace) {
-        delay = 140 + Math.random() * 60;
+        delay = entry.isScene ? 80 + Math.random() * 30 : 140 + Math.random() * 60;
       } else {
-        // Base keystroke: 90-130ms with occasional hesitation
-        delay = 90 + Math.random() * 40;
-        // 10% chance of a tiny hesitation (like finding the right key)
-        if (Math.random() < 0.1) delay += 80;
+        // Scene heading types faster (more confident), title types slower
+        if (entry.isScene) {
+          delay = 50 + Math.random() * 25;
+        } else {
+          delay = 90 + Math.random() * 40;
+          if (Math.random() < 0.1) delay += 80;
+        }
       }
 
       setTimeout(typeNext, delay);
     }
 
-    // Initial pause before typing starts
     setTimeout(typeNext, 700);
   }, []);
 
@@ -121,7 +232,6 @@ export default function Hero({ pullquotes }: HeroProps) {
     return () => clearInterval(timer);
   }, [typingDone, pullquotes]);
 
-  // Get the current line being typed (for caret placement)
   const currentLine =
     typedChars.length > 0 ? typedChars[typedChars.length - 1].line : 0;
 
@@ -145,12 +255,40 @@ export default function Hero({ pullquotes }: HeroProps) {
       </div>
 
       <div className="max-w-[1200px] mx-auto w-full relative z-10">
-        {/* Headline */}
+        {/* Scene heading */}
+        <div className="mb-6 h-8">
+          {typedChars.filter((c) => c.line === 0).length > 0 && (
+            <p
+              className="text-xs md:text-sm tracking-[0.15em] uppercase text-[var(--color-text-muted)]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {typedChars
+                .filter((c) => c.line === 0)
+                .map((tc, i) => (
+                  <motion.span
+                    key={`scene-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.05 }}
+                    className="inline-block"
+                  >
+                    {tc.char === " " ? "\u00A0" : tc.char}
+                  </motion.span>
+                ))}
+              {currentLine === 0 && caretVisible && (
+                <span className="typewriter-caret" />
+              )}
+            </p>
+          )}
+        </div>
+
+        {/* Title */}
         <h1
           className="text-[clamp(2.8rem,7vw,5.5rem)] font-normal leading-[1.15] tracking-[0.01em] mb-12"
           style={{ fontFamily: "var(--font-hero)" }}
         >
-          {lines.map((line, lineIdx) => {
+          {titleLines.map((line, titleIdx) => {
+            const lineIdx = titleIdx + 1; // offset by 1 because scene heading is line 0
             const lineChars = typedChars.filter((c) => c.line === lineIdx);
             const isCurrentLine = lineIdx === currentLine && !typingDone;
             const hasContent = lineChars.length > 0;
@@ -160,7 +298,6 @@ export default function Hero({ pullquotes }: HeroProps) {
                 key={lineIdx}
                 className="block relative"
                 style={{
-                  // Micro-shake when a key strikes on this line
                   transform:
                     lineShake === lineIdx
                       ? `translateX(${(Math.random() - 0.5) * 1.2}px)`
@@ -184,8 +321,8 @@ export default function Hero({ pullquotes }: HeroProps) {
                       }}
                       animate={{
                         opacity: 1,
-                        y: [null, 1, 0], // overshoot: slam past 0, bounce back
-                        scale: [null, 0.98, 1], // slight compression on impact
+                        y: [null, 1, 0],
+                        scale: [null, 0.98, 1],
                       }}
                       transition={{
                         duration: 0.12,
@@ -194,14 +331,10 @@ export default function Hero({ pullquotes }: HeroProps) {
                         scale: { duration: 0.18, times: [0, 0.6, 1] },
                       }}
                       className={`inline-block ${
-                        isAccent
-                          ? "text-[var(--color-accent)] italic"
-                          : ""
+                        isAccent ? "text-[var(--color-accent)] italic" : ""
                       }`}
                       style={{
-                        // Tiny imperfect rotation per character
                         transform: `rotate(${tc.rotation}deg)`,
-                        // Ink impression: brief text shadow on arrival
                         textShadow: "0 0 0px currentColor",
                       }}
                     >
@@ -210,25 +343,21 @@ export default function Hero({ pullquotes }: HeroProps) {
                   );
                 })}
 
-                {/* Block caret - solid rectangle like a real typewriter/terminal */}
                 {isCurrentLine && caretVisible && hasContent && (
                   <span className="typewriter-caret" />
                 )}
-                {/* Caret on first line before any typing */}
-                {lineIdx === 0 &&
-                  !hasContent &&
-                  !typingDone &&
-                  caretVisible && <span className="typewriter-caret" />}
-                {/* Caret at the very end when done */}
+                {lineIdx === 1 && !hasContent && sceneDone && !typingDone && caretVisible && (
+                  <span className="typewriter-caret" />
+                )}
                 {typingDone &&
-                  lineIdx === lines.length - 1 &&
+                  titleIdx === titleLines.length - 1 &&
                   caretVisible && <span className="typewriter-caret" />}
               </span>
             );
           })}
         </h1>
 
-        {/* Subtitle + CTA — fade in after typing */}
+        {/* Subtitle + CTA */}
         <motion.div
           initial={
             prefersReduced.current
