@@ -1,3 +1,8 @@
 node_modules/
-_site/
+.next/
 .cache/
+_site/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.claude/

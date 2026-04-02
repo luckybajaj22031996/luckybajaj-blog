@@ -4,13 +4,13 @@ backend:
   branch: main
   site_domain: luckybajaj-blog.netlify.app
 
-media_folder: "static/images"
+media_folder: "public/images"
 public_folder: "/images"
 
 collections:
   - name: "posts"
     label: "Blog Posts"
-    folder: "src/posts"
+    folder: "content/posts"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
@@ -33,7 +33,7 @@ collections:
     files:
       - label: "Site Info"
         name: "site"
-        file: "src/_data/site.json"
+        file: "content/site.json"
         fields:
           - { label: "Site Title", name: "title", widget: "string" }
           - { label: "Site Description", name: "description", widget: "text" }
